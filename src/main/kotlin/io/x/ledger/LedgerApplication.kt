@@ -9,3 +9,4 @@ class LedgerApplication
 fun main(args: Array<String>) {
 	runApplication<LedgerApplication>(*args)
 }
+
