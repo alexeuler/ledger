@@ -2,13 +2,14 @@ package io.x.ledger.repos
 
 import io.x.ledger.models.NewUser
 import io.x.ledger.models.User
+import io.x.ledger.utils.DEFAULT_PAGE_SIZE
+import io.x.ledger.utils.DEFAULT_SORT_FIELD
+import io.x.ledger.utils.MAX_PAGE_SIZE
+import io.x.ledger.utils.toObject
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
-import org.springframework.data.r2dbc.core.DatabaseClient
-import org.springframework.data.r2dbc.core.asType
-import org.springframework.data.r2dbc.core.awaitOne
-import org.springframework.data.r2dbc.core.flow
+import org.springframework.data.r2dbc.core.*
 import org.springframework.stereotype.Component
 
 @Component
@@ -19,19 +20,25 @@ class UsersRepo(private val conn: DatabaseClient) {
                     .fetch()
                     .awaitOne()
 
-    fun list(page: Int = 0, size: Int = 20): Flow<User> =
+    fun list(page: Int? = null, size: Int? = null): Flow<User> =
             conn.select()
                     .from("users")
-                    .page(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updated_at")))
+                    .page(
+                            PageRequest.of(
+                                    page ?: 0,
+                                    (size ?: DEFAULT_PAGE_SIZE).coerceAtMost(MAX_PAGE_SIZE),
+                                    Sort.by(Sort.Direction.DESC, DEFAULT_SORT_FIELD)
+                            )
+                    )
                     .asType<User>()
                     .fetch()
                     .flow()
 
-    suspend fun create(user: NewUser) =
-            conn.insert()
-                    .into(NewUser::class.java)
-                    .table("users")
-                    .using(user)
-                    .fetch()
-                    .awaitOne()
+    suspend fun create(user: NewUser): User =
+        conn.insert()
+                .into(NewUser::class.java)
+                .using(user)
+                .fetch()
+                .awaitOne()
+                .toObject(User::class)
 }

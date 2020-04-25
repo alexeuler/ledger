@@ -5,13 +5,12 @@ import io.x.ledger.models.User
 import io.x.ledger.repos.UsersRepo
 import kotlinx.coroutines.flow.Flow
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/users")
 class UsersController(private val usersRepo: UsersRepo) {
     @GetMapping("")
-    fun index(): Flow<User> = usersRepo.list()
+    fun index(@RequestParam page: Int?, @RequestParam size: Int?): Flow<User> = usersRepo.list(page, size)
 
     @PostMapping("")
     suspend fun create(@RequestBody user: NewUser) =

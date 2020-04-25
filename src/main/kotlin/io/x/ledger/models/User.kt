@@ -1,17 +1,16 @@
 package io.x.ledger.models
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import java.time.LocalDateTime
 import java.util.*
 
 @Table("users")
 data class User(
-        @Id val id: Long,
-        @Column("uuid") val uuid: UUID,
-        @Column("email") val email: String,
-        @Column("password") val password: String,
-        @Column("name") val name: String,
-        @Column("created_at") val createdAt: Date,
-        @Column("updated_at") val updatedAt: Date
+        val id: Long,
+        val uuid: UUID,
+        val email: String,
+        val password: String,
+        val name: String,
+        val createdAt: LocalDateTime,
+        val updatedAt: LocalDateTime
 )
