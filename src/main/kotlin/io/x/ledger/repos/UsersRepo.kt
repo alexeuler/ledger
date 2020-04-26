@@ -57,7 +57,7 @@ class UsersRepo(private val conn: DatabaseClient) {
     suspend fun update(uuid: UUID, user: UpdateUser): User {
         conn.update()
             .table("users")
-            .using(toUpdate(user))
+            .using(toUpdate(user, UpdateUser::class))
             .matching(where("uuid").`is`(uuid))
             .then()
             .awaitFirstOrNull()

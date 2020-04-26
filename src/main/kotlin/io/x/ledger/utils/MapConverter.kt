@@ -12,15 +12,15 @@ import kotlin.reflect.jvm.javaField
 fun <T: Any> Map<String, Any>.toObject(klass: KClass<T>): T =
     mapToObject(this, klass)
 
-fun <T: Any, U: Any> merge(obj: T, update: U, klass: KClass<T>): T {
-    val map = objectToMap(obj)
-    val updateMap = objectToMap(update)
+fun <T: Any, U: Any> merge(obj: T, update: U, klassObj: KClass<T>, klassUpdate: KClass<U>): T {
+    val map = objectToMap(obj, klassObj)
+    val updateMap = objectToMap(update, klassUpdate)
     val merged = mergeMaps(map, updateMap)
-    return merged.toObject(klass)
+    return merged.toObject(klassObj)
 }
 
-fun <T: Any> toUpdate(obj: T): Update {
-    val map = objectToMap(obj)
+fun <T: Any> toUpdate(obj: T, klass: KClass<T>): Update {
+    val map = objectToMap(obj, klass)
     val updateMap = map.entries.map {
         SqlIdentifier.quoted(it.key) to it.value
     }.toMap()
@@ -38,8 +38,8 @@ private fun mergeMaps(map: Map<String, Any>, update: Map<String, Any>): Map<Stri
     }.toMap()
 
 
-private fun <T: Any> objectToMap(obj: T): Map<String, Any> =
-    (obj::class.memberProperties as Collection<KProperty1<T, *>>).filter {
+private fun <T: Any> objectToMap(obj: T, klass: KClass<T>): Map<String, Any> =
+    klass.memberProperties.filter {
         it(obj) != null
     }.map {
         modelNameToMapKey(it) to it(obj)!!
