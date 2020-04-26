@@ -19,6 +19,14 @@ fun <T: Any, U: Any> merge(obj: T, update: U, klass: KClass<T>): T {
     return merged.toObject(klass)
 }
 
+fun <T: Any> toUpdate(obj: T): Update {
+    val map = objectToMap(obj)
+    val updateMap = map.entries.map {
+        SqlIdentifier.quoted(it.key) to it.value
+    }.toMap()
+    return Update.from(updateMap)
+}
+
 private fun mergeMaps(map: Map<String, Any>, update: Map<String, Any>): Map<String, Any> =
     map.entries.map {
         val updatedVal = update[it.key]

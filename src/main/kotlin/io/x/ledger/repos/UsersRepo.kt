@@ -55,11 +55,10 @@ class UsersRepo(private val conn: DatabaseClient) {
                 .toObject(User::class)
 
     suspend fun update(uuid: UUID, user: UpdateUser): User {
-        val currentUser = this.find(uuid)
-        val updatedUser = merge(currentUser, user, User::class)
         conn.update()
-            .table(User::class.java)
-            .using(updatedUser)
+            .table("users")
+            .using(toUpdate(user))
+            .matching(where("uuid").`is`(uuid))
             .then()
             .awaitFirstOrNull()
         return this.find(uuid)
