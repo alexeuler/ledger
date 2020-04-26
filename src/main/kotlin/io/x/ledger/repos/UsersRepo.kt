@@ -1,28 +1,20 @@
 package io.x.ledger.repos
 
-import io.x.ledger.models.NewUser
+import io.x.ledger.models.CreateUser
 import io.x.ledger.models.UpdateUser
 import io.x.ledger.models.User
 import io.x.ledger.utils.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.reactive.awaitFirstOrDefault
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.r2dbc.core.*
 import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 import java.util.*
 
 @Component
 class UsersRepo(private val conn: DatabaseClient) {
-    suspend fun count(): Long =
-            conn.execute("SELECT COUNT(*) FROM users")
-                    .asType<Long>()
-                    .fetch()
-                    .awaitOne()
-
     fun list(page: Int? = null, size: Int? = null): Flow<User> =
             conn.select()
                     .from("users")
@@ -45,9 +37,17 @@ class UsersRepo(private val conn: DatabaseClient) {
                     .fetch()
                     .awaitOne()
 
-    suspend fun create(user: NewUser): User =
+    suspend fun findByEmail(email: String): User =
+            conn.select()
+                    .from(User::class.java)
+                    .matching(where("email").`is`(email))
+                    .page(PageRequest.of(0, 1))
+                    .fetch()
+                    .awaitOne()
+
+    suspend fun create(user: CreateUser): User =
         conn.insert()
-                .into(NewUser::class.java)
+                .into(CreateUser::class.java)
                 .using(user)
                 .fetch()
                 .awaitOne()
@@ -69,4 +69,14 @@ class UsersRepo(private val conn: DatabaseClient) {
                 .matching(where("uuid").`is`(uuid))
                 .then()
                 .awaitFirstOrNull()
+
+    suspend fun isUnique(uuid: UUID, email: String): Boolean {
+        val count = conn.execute("SELECT COUNT(*) FROM users WHERE uuid = :uuid OR email = :email")
+                .bind("uuid", uuid)
+                .bind("email", email)
+                .asType<Long>()
+                .fetch()
+                .awaitOne()
+        return count == 0L
+    }
 }

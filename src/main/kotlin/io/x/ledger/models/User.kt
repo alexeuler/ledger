@@ -17,7 +17,7 @@ data class User(
 )
 
 @Table("users")
-data class NewUser(
+data class CreateUser(
         val uuid: UUID,
         val email: String,
         val password: String,
@@ -26,7 +26,6 @@ data class NewUser(
 
 @Table("users")
 data class UpdateUser(
-        val email: String?,
         val password: String?,
         val name: String?
 )

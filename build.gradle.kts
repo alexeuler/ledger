@@ -33,6 +33,9 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+//	Just the validator, not hibernate module
+	implementation("org.hibernate.validator:hibernate-validator")
+	implementation("org.hibernate.validator:hibernate-validator-annotation-processor")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("io.r2dbc:r2dbc-postgresql")
 	runtimeOnly("org.postgresql:postgresql")

@@ -1,6 +1,6 @@
 package io.x.ledger.controllers
 
-import io.x.ledger.models.NewUser
+import io.x.ledger.models.CreateUser
 import io.x.ledger.models.UpdateUser
 import io.x.ledger.models.User
 import io.x.ledger.repos.UsersRepo
@@ -16,7 +16,7 @@ class UsersController(private val usersRepo: UsersRepo) {
             usersRepo.list(page, size)
 
     @PostMapping("")
-    suspend fun create(@RequestBody user: NewUser) =
+    suspend fun create(@RequestBody user: CreateUser) =
             usersRepo.create(user)
 
     @PutMapping("/{uuid}")
