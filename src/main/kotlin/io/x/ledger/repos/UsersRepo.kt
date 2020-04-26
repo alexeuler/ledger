@@ -13,9 +13,19 @@ import org.springframework.data.relational.core.query.Criteria.where
 import org.springframework.stereotype.Component
 import java.util.*
 
+interface UsersRepo {
+    fun list(page: Int? = null, size: Int? = null): Flow<User>
+    suspend fun find(uuid: UUID): User
+    suspend fun findByEmail(email: String): User
+    suspend fun create(user: CreateUser): User
+    suspend fun update(uuid: UUID, user: UpdateUser): User
+    suspend fun delete(uuid: UUID): Void?
+    suspend fun isUnique(uuid: UUID, email: String): Boolean
+}
+
 @Component
-class UsersRepo(private val conn: DatabaseClient) {
-    fun list(page: Int? = null, size: Int? = null): Flow<User> =
+class UsersRepoImpl(private val conn: DatabaseClient): UsersRepo {
+    override fun list(page: Int?, size: Int?): Flow<User> =
             conn.select()
                     .from("users")
                     .page(
@@ -29,7 +39,7 @@ class UsersRepo(private val conn: DatabaseClient) {
                     .fetch()
                     .flow()
 
-    suspend fun find(uuid: UUID): User =
+    override suspend fun find(uuid: UUID): User =
             conn.select()
                     .from(User::class.java)
                     .matching(where("uuid").`is`(uuid))
@@ -37,7 +47,7 @@ class UsersRepo(private val conn: DatabaseClient) {
                     .fetch()
                     .awaitOne()
 
-    suspend fun findByEmail(email: String): User =
+    override suspend fun findByEmail(email: String): User =
             conn.select()
                     .from(User::class.java)
                     .matching(where("email").`is`(email))
@@ -45,7 +55,7 @@ class UsersRepo(private val conn: DatabaseClient) {
                     .fetch()
                     .awaitOne()
 
-    suspend fun create(user: CreateUser): User =
+    override suspend fun create(user: CreateUser): User =
         conn.insert()
                 .into(CreateUser::class.java)
                 .using(user)
@@ -53,7 +63,7 @@ class UsersRepo(private val conn: DatabaseClient) {
                 .awaitOne()
                 .toObject(User::class)
 
-    suspend fun update(uuid: UUID, user: UpdateUser): User {
+    override suspend fun update(uuid: UUID, user: UpdateUser): User {
         conn.update()
             .table("users")
             .using(toUpdate(user, UpdateUser::class))
@@ -63,14 +73,14 @@ class UsersRepo(private val conn: DatabaseClient) {
         return this.find(uuid)
     }
 
-    suspend fun delete(uuid: UUID): Void? =
+    override suspend fun delete(uuid: UUID): Void? =
         conn.delete()
                 .from(User::class.java)
                 .matching(where("uuid").`is`(uuid))
                 .then()
                 .awaitFirstOrNull()
 
-    suspend fun isUnique(uuid: UUID, email: String): Boolean {
+    override suspend fun isUnique(uuid: UUID, email: String): Boolean {
         val count = conn.execute("SELECT COUNT(*) FROM users WHERE uuid = :uuid OR email = :email")
                 .bind("uuid", uuid)
                 .bind("email", email)
