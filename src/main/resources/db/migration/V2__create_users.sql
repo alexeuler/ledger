@@ -9,3 +9,5 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 SELECT manage_updated_at('users');
+CREATE UNIQUE INDEX users_uuid_idx ON users (uuid);
+CREATE INDEX users_email_idx ON users (email);

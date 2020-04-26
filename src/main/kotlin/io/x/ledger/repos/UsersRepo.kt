@@ -1,6 +1,5 @@
 package io.x.ledger.repos
 
-import io.x.ledger.RepoNotFoundException
 import io.x.ledger.models.NewUser
 import io.x.ledger.models.UpdateUser
 import io.x.ledger.models.User

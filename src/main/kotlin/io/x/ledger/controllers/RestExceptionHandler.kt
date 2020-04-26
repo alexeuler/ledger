@@ -11,6 +11,11 @@ import java.lang.RuntimeException
 @ControllerAdvice
 class RestExceptionHandler {
     @ExceptionHandler(EmptyResultDataAccessException::class)
-    fun handleEmptyResult(e: RuntimeException, req: WebRequest): ResponseEntity<Any> =
-        ResponseEntity(e.message, HttpStatus.NOT_FOUND)
+    fun handleEmptyResult(e: EmptyResultDataAccessException): ResponseEntity<Any> =
+        ResponseEntity(mapOf("message" to "Record not found"), HttpStatus.NOT_FOUND)
+
+    @ExceptionHandler(RuntimeException::class)
+    fun handleDefault(e: RuntimeException): ResponseEntity<Any> =
+            ResponseEntity(mapOf("message" to "Internal Server Error"), HttpStatus.INTERNAL_SERVER_ERROR)
+
 }
